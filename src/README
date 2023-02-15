@@ -1,0 +1,66 @@
+DIACONU ARINA-IOANA                 332CB
+
+               README - APD - TEMA2
+
+    Implementare:
+
+        Fisierele sursa ce compun aceasta tema sunt Tema2.java, OrderThread.java
+si ProductThread.java.
+        Tema2.java este clasa principala a programului, ce contine metoda main.
+        OrderThread.java si ProductThread.java sunt clase ce implementeaza
+interfata Runnable si corespund celor doua niveluri de paralelizare cerute in
+enuntul temei.
+
+    Tema2.java
+
+        - metoda main primeste cele 2 argumente din linia de comanda, tratand
+cazul de eroare in care argumentele sunt insuficiente sau prea multe. Pentru a
+simplifica citirea si scrierea din si respectiv, in fisiere, creeaza un
+buffered reader pentru fisierul "orders.txt" din care trebuie sa citeasca
+threadurile de la primul nivel de paralelizare si cate un buffered writer pentru
+cele doua fisiere de output care se cer la final. Asigurarea ca la cel de-al
+doilea nivel de paralelizare nu sunt mai mult de numarul de threaduri primit ca
+argument (sa il numim n) este realizata printr-un un semafor instantiat cu acel
+n. Sunt generate n threaduri corespunzatoare primului nivel de paralelizare,
+sunt pornite si apoi li se da join. La final sunt inchise toate buffered
+reader-urile si buffered writer-urile instantiate.
+
+    OrderThread.java
+
+        - este clasa ce corespunde primului nivel de paralelizare.
+        - are ca membri numele folderului de input, buffered reader-ul de la
+care trebuie sa citeasca threadurile, cele 2 buffered writer corespunzatoare
+celor doua fisiere de output in care trebuie sa scrie threadurile si semaforul
+pentru cel de-al doilea nivel de paralelizare.
+        - primeste prin constructor membrii explicati anterior.
+        - citirea din buffered reader se realizeaza in paralel: cat timp mai
+sunt linii de citit, fiecare thread ia in mod sincronizat cate o linie pe care
+o prelucreaza. Pentru fiecare linie, in cazul in care este valida (nenula), sunt
+extrase id-ul comenzii si numarul de produse. Daca respectiva comanda este
+valida (numarul de produse (sa il numim p) este mai mare ca 0), este creat un
+buffered reader pentru a facilita citirea din cel de-al doilea fisier de input
+si se genereaza p threaduri de nivel 2 de paralelizare. Inainte de a porni un
+thread de nivel 2 se face acquire pe semafor pentru a se asigura ca nu sunt
+pornite mai mult de n threaduri de nivel 2. Dupa ce sunt pornite toate, li se da
+join si se inchide buffered reader-ul. La final, threadul este sigur ca toate
+produsele din comanda au fost prelucrate si scrie linia corespunzatoare comenzii
+in fisierul de output "orders_out.txt", urmata de textul "shipped".
+
+    ProductThread.java
+
+        - este clasa ce corespunde celui de-al doilea nivel de paralelizare.
+        - are ca membri id-ul comenzii din care un thread de nivel 2 trebuie sa
+prelucreze cate un produs, buffered reader-ul corespunzator fisierului de input
+ce contine produsele: "order_products.txt", buffered writer-ul in care trebuie
+sa scrie threadurile de nivel 2 si semaforul.
+        - primeste prin constructor membrii explicati anterior.
+        - citirea celui de-al doilea fisier de input se realizeaza similar
+primului, in paralel. Fiecare thread citeste cate o linie in mod sincronizat,
+verifica daca este valida (nenula), ii verifica id-ul comenzii si daca este
+acelasi cu id-ul comenzii primite prin constructor, atunci a gasit produsul pe
+care trebuie sa il prelucreze si scrie in fisierul de output corespunzator
+celui de-al doilea nivel de paralelizare "order_products_out.txt" linia gasita
+urmata de textul "shipped". In acest moment threadul trebuie sa isi incheie
+executia si face release pe semafor pentru a marca ca poate fi pornit alt thread
+de nivel 2.
+
